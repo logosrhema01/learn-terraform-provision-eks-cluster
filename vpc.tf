@@ -5,7 +5,7 @@ variable "region" {
 
 provider "aws" {
   region = var.region
-  shared_credentials_file = ".credentials"
+  shared_credentials_files = [".credentials"]
 }
 
 data "aws_availability_zones" "available" {}

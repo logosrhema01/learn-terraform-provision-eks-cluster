@@ -1,32 +1,34 @@
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
-  version         = "17.24.0"
+  version         = "19.10.0"
   cluster_name    = local.cluster_name
-  cluster_version = "1.22"
-  subnets         = module.vpc.private_subnets
+  cluster_version = "1.24"
+  subnet_ids         = module.vpc.private_subnets
 
   vpc_id = module.vpc.vpc_id
 
-  workers_group_defaults = {
-    root_volume_type = "gp2"
+  self_managed_node_group_defaults = {
+    vpc_security_group_ids = ["gp2"]
   }
 
-  worker_groups = [
-    {
+  self_managed_node_groups = {
+    wrkrg1 = {
       name                          = "worker-group-1"
-      instance_type                 = "t2.large"
-      additional_userdata           = "echo foo bar"
+      instance_type                 = "t3.large"
+      post_bootstrap_user_data           = "echo foo bar"
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
-      asg_desired_capacity          = 2
-    },
-    {
+      desired_size          = 2
+      launch_template_name = "wrkrg1"
+    }
+    wrkrg2 = {
       name                          = "worker-group-2"
       instance_type                 = "t2.large"
-      additional_userdata           = "echo foo bar"
+      post_bootstrap_user_data           = "echo foo bar"
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_two.id]
-      asg_desired_capacity          = 1
-    },
-  ]
+      desired_size          = 1
+      launch_template_name = "wrkrg2"
+    }
+  }
 }
 
 data "aws_eks_cluster" "cluster" {
@@ -38,5 +40,5 @@ data "aws_eks_cluster_auth" "cluster" {
 }
 
 data "aws_iam_role" "workers" {
-  name = module.eks.worker_iam_role_name
+  name = module.eks.cluster_iam_role_name
 }

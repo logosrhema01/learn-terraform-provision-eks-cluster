@@ -7,7 +7,7 @@ resource "aws_iam_openid_connect_provider" "github" {
 
 data "aws_iam_policy_document" "github_assume_role_policy" {
   statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+    actions = ["sts:AssumeRoleWithWebIdentity", "iam:CreateRole"]
     effect  = "Allow"
 
     condition {
@@ -20,7 +20,7 @@ data "aws_iam_policy_document" "github_assume_role_policy" {
       identifiers = [aws_iam_openid_connect_provider.github.arn]
       type        = "Federated"
     }
-  }
+  } 
 }
 
 resource "aws_iam_role_policy" "github_oidc_eks_policy" {
