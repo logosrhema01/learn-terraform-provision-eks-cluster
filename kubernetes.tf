@@ -42,38 +42,43 @@ resource "kubernetes_cluster_role_binding" "github_oidc_cluster_role_binding" {
   }
 }
 
-# resource "kubernetes_config_map" "aws-auth" {
-#   data = {
-#     "mapRoles" = yamlencode([
-#       {
-#         "groups": ["system:bootstrappers", "system:nodes"],
-#         "rolearn": data.aws_iam_role.workers.arn
-#         "username": "system:node:{{EC2PrivateDNSName}}"
-#       },
-#       {
-#         "rolearn": aws_iam_role.github_oidc_auth_role.arn
-#         "username": "github-oidc-auth-user"
+ resource "kubernetes_config_map" "aws-auth" {
+   data = {
+     "mapRoles" = yamlencode([
+       {
+         "groups": ["system:bootstrappers", "system:nodes"],
+         "rolearn": data.aws_iam_role.workers.arn
+         "username": "system:node:{{EC2PrivateDNSName}}"
+       },
+       {
+         "rolearn": aws_iam_role.github_oidc_auth_role.arn
+         "username": "github-oidc-auth-user"
         
-#       }
-#     ])
+       }
+     ])
 
-#     "mapAccounts" = yamlencode([])
-#     "mapUsers" = yamlencode([])
-#   }
+     "mapAccounts" = yamlencode([])
+     "mapUsers" = yamlencode([])
+   }
 
-#   metadata {
-#     name      = "aws-auth"
-#     namespace = "kube-system"
-#     labels = {
-#       "app.kubernetes.io/managed-by" = "Terraform"
-#       "terraform.io/module"          = "terraform-aws-modules.eks.aws"
-#     }
-#   }
-# }
+   metadata {
+     name      = "aws-auth"
+     namespace = "kube-system"
+     labels = {
+       "app.kubernetes.io/managed-by" = "Terraform"
+       "terraform.io/module"          = "terraform-aws-modules.eks.aws"
+     }
+   }
+ }
 
-data "aws_secretsmanager_secret_version" "github_container_registry" {
-  secret_id = "GithubContainerRegistryAccess"
-}
+#resource "aws_secretsmanager_secret" "github_container_registry" {
+#  name = "github-container-registry"
+#}
+
+#resource "aws_secretsmanager_secret_version" "github_container_registry" {
+#  secret_id = "GithubContainerRegistryAccess"
+#  depends_on = [aws_secretsmanager_secret.github_container_registry]
+#}
 
 resource "kubernetes_secret" "ghcr_cred" {
   metadata {
@@ -87,10 +92,10 @@ resource "kubernetes_secret" "ghcr_cred" {
     ".dockerconfigjson" = jsonencode({
       auths = {
         "ghcr.io" = {
-          "username" = jsondecode(data.aws_secretsmanager_secret_version.github_container_registry.secret_string)["username"]
-          "password" = jsondecode(data.aws_secretsmanager_secret_version.github_container_registry.secret_string)["password"]
-          "email"    = jsondecode(data.aws_secretsmanager_secret_version.github_container_registry.secret_string)["email"]
-          "auth"     = base64encode("${jsondecode(data.aws_secretsmanager_secret_version.github_container_registry.secret_string)["username"]}:${jsondecode(data.aws_secretsmanager_secret_version.github_container_registry.secret_string)["password"]}")
+          "username" = "logosrhema01"
+          "password" = "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"
+          "email"    = "achiampongk22@gmail.com"
+          "auth"     = base64encode("logosrhema01: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")
         }
       }
     })
